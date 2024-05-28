@@ -25,6 +25,11 @@ module.exports = async (req, res) => {
     }
 
     try {
+      const existingSubscriber = await NewsletterSubscriber.findOne({ email });
+      if (existingSubscriber) {
+        return res.status(400).json({ error: 'You are already subscribed to the newsletter' });
+      }
+
       const subscriber = new NewsletterSubscriber({ email });
       await subscriber.save();
       res.status(201).json({ message: 'Subscribed successfully' });
