@@ -1,16 +1,30 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const passport = require('passport');
+const session = require('express-session');
 const cors = require('cors');
 const blogRoutes = require('./routes/blogs');
 const newsletterRoutes = require('./routes/newsletter');
+const authRoutes = require('./routes/auth');
+const reviewRoutes = require('./routes/reviews');
+const jwt = require('jsonwebtoken');
+const User = require('./models/User');
 
 dotenv.config();
+require('./config/passport');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+const corsOptions = {
+  origin: 'http://localhost:5173', // your frontend URL
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
@@ -21,12 +35,25 @@ app.use((err, req, res, next) => {
   next();
 });
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected...'))
-  .catch(err => console.error(err));
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your_secret_key',
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/blogs', blogRoutes);
 app.use('/newsletter', newsletterRoutes);
+app.use('/auth', authRoutes);
+app.use('/reviews', reviewRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
