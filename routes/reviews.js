@@ -13,6 +13,8 @@ router.post('/', authenticateJWT, async (req, res) => {
   const { rating, review } = req.body;
   const newReview = new Review({
     user: req.user._id,
+    name: req.user.name,  
+    email: req.user.email, 
     rating,
     review
   });
@@ -26,8 +28,12 @@ router.post('/', authenticateJWT, async (req, res) => {
 });
 
 router.get('/', async (req, res) => {
-  const reviews = await Review.find().populate('user').exec();
-  res.json(reviews);
+  try {
+    const reviews = await Review.find().populate('user').exec();
+    res.json(reviews);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
