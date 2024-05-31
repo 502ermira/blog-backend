@@ -1,81 +1,52 @@
-const express = require('express');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
 const Review = require('../models/Review');
 const authenticateJWT = require('../middleware/authenticateJWT');
-
-dotenv.config();
-
-const app = express();
-app.use(express.json());
+require('dotenv').config();
 
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
-}).then(() => console.log('MongoDB connected'))
+}).then(() => console.log('MongoDB connected for serverless function'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-app.post('/reviews', authenticateJWT, async (req, res) => {
-  const { rating, review } = req.body;
-  const newReview = new Review({
-    user: req.user._id,
-    name: req.user.name,  
-    email: req.user.email, 
-    picture: req.user.picture,
-    rating,
-    review
-  });
+module.exports = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*'); 
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); 
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); 
 
-  try {
-    await newReview.save();
-    res.status(201).json(newReview);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
   }
-});
 
-const postReview = async (req, res) => {
-    console.log('User in request:', req.user);
-  
-    const { rating, review } = req.body;
-    const newReview = new Review({
-      user: req.user._id,
-      name: req.user.name,
-      email: req.user.email,
-      picture: req.user.picture,
-      rating,
-      review
+  if (req.method === 'POST') {
+    // JWT authentication
+    authenticateJWT(req, res, async () => {
+      const { rating, review } = req.body;
+      const newReview = new Review({
+        user: req.user._id,
+        name: req.user.name,  
+        email: req.user.email, 
+        picture: req.user.picture,
+        rating,
+        review
+      });
+
+      try {
+        await newReview.save();
+        res.status(201).json(newReview);
+      } catch (err) {
+        res.status(400).json({ error: err.message });
+      }
     });
-  
-    try {
-      await newReview.save();
-      res.status(201).json(newReview);
-    } catch (err) {
-      res.status(400).json({ error: err.message });
-    }
-  };
-  
-
-app.get('/reviews', async (req, res) => {
-  try {
-    const reviews = await Review.find().populate('user').exec();
-    res.json(reviews);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-const getReviews = async (req, res) => {
+  } else if (req.method === 'GET') {
     try {
       const reviews = await Review.find().populate('user').exec();
-      res.json(reviews);
+      res.status(200).json(reviews);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
-  };
-
-  module.exports = {
-    getReviews,
-    postReview
-  };
-  module.exports = router;
+  } else {
+    res.status(405).json({ error: `Method ${req.method} not allowed` });
+  }
+};
