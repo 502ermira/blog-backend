@@ -1,15 +1,23 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "api/subscribe.js",
-        "use": "@vercel/node"
-      }
-    ],
-    "routes": [
-      {
-        "src": "/api/subscribe",
-        "dest": "api/subscribe.js"
-      }
-    ]
-  }  
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/subscribe.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/reviews.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/subscribe",
+      "dest": "api/subscribe.js"
+    },
+    {
+      "src": "/api/reviews",
+      "dest": "api/reviews.js"
+    }
+  ]
+}
