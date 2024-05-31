@@ -7,15 +7,16 @@ passport.use(new GoogleStrategy({
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   callbackURL: '/auth/google/callback'
 }, async (accessToken, refreshToken, profile, done) => {
-  const { id, displayName, emails } = profile;
+  const { id, displayName, emails, photos } = profile;
   const email = emails[0].value;
+  const picture = photos[0].value;
 
   try {
     console.log(`Looking for user with googleId: ${id}`);
     let user = await User.findOne({ googleId: id });
     if (!user) {
       console.log(`User not found, creating new user with googleId: ${id}`);
-      user = new User({ googleId: id, name: displayName, email });
+      user = new User({ googleId: id, name: displayName, email, picture });
       await user.save();
       console.log(`User created: ${user}`);
     }
@@ -25,7 +26,6 @@ passport.use(new GoogleStrategy({
     done(err, null);
   }
 }));
-
 
 passport.serializeUser((user, done) => {
   done(null, user.id);

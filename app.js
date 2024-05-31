@@ -8,8 +8,6 @@ const blogRoutes = require('./routes/blogs');
 const newsletterRoutes = require('./routes/newsletter');
 const authRoutes = require('./routes/auth');
 const reviewRoutes = require('./routes/reviews');
-const jwt = require('jsonwebtoken');
-const User = require('./models/User');
 
 dotenv.config();
 require('./config/passport');
@@ -18,7 +16,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const corsOptions = {
-  origin: 'http://localhost:5173', // your frontend URL
+  origin: 'http://localhost:5173',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']

@@ -15,6 +15,7 @@ router.post('/', authenticateJWT, async (req, res) => {
     user: req.user._id,
     name: req.user.name,  
     email: req.user.email, 
+    picture: req.user.picture,
     rating,
     review
   });
