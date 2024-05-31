@@ -10,9 +10,16 @@ mongoose.connect(process.env.MONGO_URI, {
   .catch(err => console.error('MongoDB connection error:', err));
 
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*'); 
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS'); 
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); 
+  const allowedOrigins = ['http://localhost:5173'];
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   if (req.method === 'OPTIONS') {
     res.status(200).end();
@@ -20,7 +27,6 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'POST') {
-    // JWT authentication
     authenticateJWT(req, res, async () => {
       const { rating, review } = req.body;
       const newReview = new Review({
