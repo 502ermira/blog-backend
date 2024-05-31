@@ -16,7 +16,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: process.env.NODE_ENV === 'production' ? 'https://blog-backend-9w0ln9dl4-ermiras-projects-cb44b1b3.vercel.app' : 'http://localhost:5173',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
